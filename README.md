@@ -24,7 +24,7 @@ writes for you.
 Open Claude Code or Codex anywhere and paste:
 
 ```
-Install cy-team from https://github.com/<owner>/cy-team. Read INSTALL.md in that repo and follow it.
+Install cy-team from https://github.com/tiinchii/cy-team.git. Read INSTALL.md in that repo and follow it.
 ```
 
 The agent clones the kit to `~/.cy-team` and installs the skill and agents for your account.
