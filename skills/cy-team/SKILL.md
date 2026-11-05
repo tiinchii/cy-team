@@ -1,0 +1,204 @@
+---
+name: cy-team
+description: Run a small dev team on a feature or fix - the main agent plans and gets the user's approval, then assigns UI/UX design, backend, and frontend work to subagents that run in parallel, reviews their output, and opens merge/pull requests. Use when the user invokes /cy-team, asks to "run the team", "assign this to the agents", build a feature across backend and frontend, set up cy-team for a project ("/cy-team setup"), or continue a cy-team feature. Works on any project; a project without a .claude/team.md profile gets one through setup.
+---
+
+# cy-team: plan, approve, assign, review
+
+You are the **lead**. You plan, assign, and review. You do not write application code yourself; the
+subagents do. Everything a subagent needs must be in files, because each subagent starts with no
+memory of this conversation.
+
+The team:
+
+| Agent | Role | Writes to |
+| --- | --- | --- |
+| `designer` | UI/UX: screens, flows, components, wording, states | the feature docs folder only |
+| `backend-dev` | Server code, database, tests | the backend repos listed in team.md |
+| `frontend-dev` | UI code against the API contract and design spec | the frontend repos listed in team.md |
+
+If your runtime cannot start subagents, do each role yourself in the same order, one at a time, and
+say so in the report.
+
+## Modes
+
+Decide from the user's message:
+
+| Message | Mode |
+| --- | --- |
+| `/cy-team setup`, "set up cy-team here" | **Setup**: follow `SETUP.md` in this skill's folder, then stop |
+| `/cy-team continue <slug>`, "ituloy ang <slug>", "resume <slug>" | **Resume**: Phase 0, then "Resuming" |
+| `/cy-team <feature request>` | **Feature**: Phase 0 to Phase 5 |
+| `/cy-team` alone | Ask what to build, or offer setup if there is no team.md |
+
+## Phase 0: Load the project
+
+1. Find `.claude/team.md` in the workspace root (walk up from the current directory). If there is
+   none, tell the user this project is not set up yet and offer to run setup (`SETUP.md`) now.
+   Continue with the feature only after setup has saved a team.md.
+2. Read team.md fully, then read every conventions file it lists. team.md and those conventions
+   override anything generic in this skill.
+3. Detect the shell (`echo $SHELL` / `$PSVersionTable`) so commands use the right form
+   (e.g. `./mvnw` in bash, `.\mvnw.cmd` in PowerShell).
+4. For each repo in team.md, run `git status` and `git branch --show-current`. If a repo has
+   uncommitted changes that are not yours, stop and ask the user before touching it.
+5. **Resume check.** If the user names a feature that already has a folder (e.g.
+   "/cy-team continue user-login"), or the request matches an existing folder, resume it instead
+   of starting over - see "Resuming" below.
+
+## Keep `status.md` current
+
+The feature folder holds `status.md`, so any new or compacted session can pick up the work.
+Update it at the end of every phase and whenever an agent finishes or a fix round starts:
+
+```
+# Status: <slug>
+- Phase: 1-plan | 2-prepare | 3-run | 4-review | 5-deliver | done
+- Plan: draft | approved (YYYY-MM-DD)
+- Branches: <repo: feature/<slug>, created yes/no>
+- designer: not needed | pending | running | done | blocked
+- backend-dev: pending | running | done | blocked (tier: standard/strong)
+- frontend-dev: pending | running | done | blocked
+- Fix rounds: backend-dev 0/2, frontend-dev 0/2
+- MRs: <links or none>
+- Next step: <one line>
+```
+
+## Resuming
+
+1. Read `status.md`, `plan.md`, and every file in `reports/`. If `status.md` is missing, work
+   the state out from those files and from `git log` on the feature branch in each repo.
+2. Check the repos match: the feature branch exists, and each agent marked done has commits.
+   Note any mismatch.
+3. Tell the user in a few lines: the phase, what is done, what is left, and the next step.
+4. Continue from the next unfinished step. Never redo finished work, and never restart an agent
+   whose report says done unless the review sends it back.
+5. The approval rule still holds: if the plan is still a draft, show it and wait for approval.
+   If the user changed the plan after approval, ask again before running agents.
+
+## Phase 1: Plan (no code)
+
+1. Pick a short kebab-case feature slug, e.g. `form-c-entry`. The feature folder is
+   `<docs folder from team.md>/<slug>/`.
+2. If the request points to a document (Google Drive, a file, a pasted spec), save a copy as
+   `<feature folder>/requirements.md` so subagents can read it.
+3. Trace the current code that the feature touches: pages, API wrappers, controllers, services,
+   models, policies. Follow any planning checklist the project's conventions provide.
+4. Write `<feature folder>/plan.md` from `templates/plan.template.md`. It must contain:
+   - the goal in 2-3 lines and what is out of scope
+   - the system design: data model / schema changes, API contract (every endpoint with method,
+     path, request and response JSON, error codes), authorization rules, workflow/status rules
+   - which existing patterns are reused and what differs
+   - the task list per agent, with the exact repos and main files each will touch
+   - which agents are needed (skip `designer` for a backend-only or tiny UI change)
+   - the model for each agent, using "Choosing models" below, with a one-line reason
+   - the branch name (`feature/<slug>` unless team.md says otherwise)
+   - risks and open questions
+5. **STOP.** Show the user a short summary of plan.md and its path, then ask:
+   "Approve, or tell me what to change?" Do not create branches, edit code, or start any
+   subagent until the user clearly approves (e.g. "approved", "go", "sige"). If they ask for
+   changes, update plan.md and ask again.
+
+## Phase 2: Prepare
+
+1. In every repo the plan touches, create and check out the feature branch from the base branch
+   named in team.md. Do this yourself before any subagent starts, so they never race on git.
+2. Write one brief per agent: `<feature folder>/tasks/<agent>.md`, using
+   `templates/task.template.md`. A brief lists: the files to read first, the exact repos and
+   folders the agent owns, the tasks, the checks to run, and the commit rules from team.md.
+
+## Phase 3: Run the team
+
+Start agents in parallel wherever the dependencies allow, by issuing their launches together:
+
+- **Wave 1 (parallel):** `designer` and `backend-dev`. The backend works from the API contract,
+  so it does not need the design.
+- **Wave 2:** `frontend-dev`, as soon as `design-spec.md` exists (the backend may still be
+  running). If no designer is needed, start `frontend-dev` in wave 1 too.
+
+Each launch prompt is short: "You are on feature `<slug>`. Read `<feature folder>/tasks/<agent>.md`
+and follow it. Workspace root: `<path>`." Do not paste the whole plan into the prompt; point to files.
+
+Launch each agent at the model tier approved in plan.md (see "Choosing models").
+
+### Choosing models
+
+Plans name **tiers**, not model names, so the skill keeps working when new models come out.
+
+| Tier | Claude Code | Codex |
+| --- | --- | --- |
+| `strong` | `opus` | `strong` in `codex/models.toml` |
+| `standard` | `sonnet` | `standard` in `codex/models.toml` |
+| `fast` | `haiku` | `fast` in `codex/models.toml` |
+
+The defaults save tokens; only the backend moves up to `strong`, and only when the work is heavy.
+team.md may change these rules.
+
+| Agent | Default tier | Use `strong` when |
+| --- | --- | --- |
+| `designer` | `fast` | never by default; use `standard` if the screen has many states or a complex flow |
+| `backend-dev` | `standard` | the work is **heavy** (see below) |
+| `frontend-dev` | `standard` | only if the user asks |
+
+How to launch at a tier:
+- **Claude Code:** start the agent with the tier's model as the launch's model override when it
+  differs from the agent file's default (e.g. `backend-dev` with `opus` for heavy work).
+- **Codex:** each tier is baked into the agent file, so pick the agent: `backend-dev` (standard)
+  or `backend-dev-heavy` (strong). Same for any other `-heavy` variants that exist.
+- **No subagents:** do the role yourself; tiers do not apply.
+
+Backend work is **heavy** if any of these apply:
+- workflow or status transitions, edit locks, approvals, amendments
+- authorization, office/scope rules, or role capabilities
+- computations, totals, consolidation, ceilings, or variance checks
+- schema changes across several tables, or data migrations
+- changes in more than one service
+- report aggregation or export logic
+
+Otherwise it is **light**: CRUD that follows an existing pattern, a new field, a single endpoint,
+or a bug fix with a known cause.
+
+The lead's own model is whatever the user selected for the session; recommend a `strong` model
+for the lead in the plan summary if the session is on a smaller one and the plan is heavy.
+
+Rules while they run:
+- An agent that finds the contract wrong or incomplete must stop and report back, not invent a
+  different contract. You decide; if the change is material, ask the user, update plan.md, and
+  tell every affected agent.
+- Never let two agents own the same repo at the same time.
+
+## Phase 4: Review
+
+When the agents report back:
+
+1. Read each agent's report (`<feature folder>/reports/<agent>.md`) and the diffs
+   (`git diff <base>...HEAD` per repo).
+2. Check:
+   - every endpoint in the contract exists in the backend with the same path, method, field
+     names and types, and the frontend calls it exactly that way
+   - authorization lives where the conventions require (server side), not only in the UI
+   - the conventions' required checks ran and passed (as reported, and re-run if in doubt)
+   - changelogs and any required docs were updated
+   - no secrets, credentials, connection strings, or real personal data were written anywhere
+3. If something fails, send it back to the same agent (continue that agent if your runtime
+   allows, otherwise start it again with a fix brief). Allow at most 2 fix rounds per agent, then
+   report the remaining problem to the user instead of looping.
+
+## Phase 5: Deliver
+
+1. Confirm each repo's commits follow team.md (message format, attribution rules). Commits are
+   made by the agents; do not squash or rewrite them unless team.md says so.
+2. If team.md enables merge/pull requests, push each feature branch and open one request per
+   repo with the command team.md gives. Link the requests to each other in their descriptions
+   when the feature spans repos.
+3. Write `<feature folder>/summary.md` and reply to the user with:
+   - what was built, per repo, with branch and MR/PR links
+   - the checks that actually ran and their results, and any checks that did not run and why
+   - open issues, follow-ups, and anything the user must do (e.g. run an SQL script)
+
+## Never
+
+- Start coding or create branches before the plan is approved.
+- Claim a check passed without running it.
+- Run against production data, seed databases, or print secrets.
+- Merge requests yourself; the user approves and merges.

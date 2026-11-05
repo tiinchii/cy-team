@@ -1,0 +1,23 @@
+# cy-team model tiers for Codex.
+# This is the ONLY place Codex model names live. When OpenAI ships a new model, change the
+# names here, then tell Codex: "update cy-team agent models from models.toml".
+#
+# Fill in the exact model names Codex shows you (e.g. in its /model picker).
+
+[tiers]
+strong   = "<strongest Codex model>"    # heavy backend work (backend-dev-heavy)
+standard = "<mid-tier Codex model>"     # backend-dev, frontend-dev
+fast     = "<cheapest Codex model>"     # designer
+
+# Optional reasoning effort per tier (leave as is if unsure).
+[effort]
+strong   = "high"
+standard = "medium"
+fast     = "low"
+
+# Which agent uses which tier. Usually no need to change this.
+[agents]
+designer          = "fast"
+backend-dev       = "standard"
+backend-dev-heavy = "strong"
+frontend-dev      = "standard"
