@@ -67,15 +67,28 @@ Update it at the end of every phase and whenever an agent finishes or a fix roun
 
 ## Resuming
 
+Resume means **report first, then wait**. Do no new work until the user says to go on.
+
 1. Read `status.md`, `plan.md`, and every file in `reports/`. If `status.md` is missing, work
    the state out from those files and from `git log` on the feature branch in each repo.
-2. Check the repos match: the feature branch exists, and each agent marked done has commits.
-   Note any mismatch.
-3. Tell the user in a few lines: the phase, what is done, what is left, and the next step.
-4. Continue from the next unfinished step. Never redo finished work, and never restart an agent
-   whose report says done unless the review sends it back.
-5. The approval rule still holds: if the plan is still a draft, show it and wait for approval.
-   If the user changed the plan after approval, ask again before running agents.
+2. Quietly check the repos match (feature branch exists; each agent marked done has commits).
+3. Reply in **at most 5 lines**: phase, what is done, what is left, open questions, next step.
+   End with one question, e.g. "Ituloy ko na?" or, if the plan is still a draft,
+   "Approve, or tell me what to change?"
+4. Stop. Do not investigate open questions, edit plan.md, or start agents on resume. Do those
+   only after the user answers, or if the user's own message already asked for it
+   (e.g. "continue and run it").
+5. When continuing: pick up at the next unfinished step, never redo finished work, and never
+   restart an agent whose report says done unless the review sends it back. The approval rule
+   still holds.
+
+## Talking to the user
+
+Keep messages short; the details live in the feature files.
+- Plan summary for approval: at most 8 bullets, then the path to plan.md and the question.
+- Progress while agents run: one line per event ("backend-dev done, checks pass").
+- Final report: per repo one line (branch, commits, MR link), then checks run, then open issues.
+- Do not narrate each command you run.
 
 ## Phase 1: Plan (no code)
 
