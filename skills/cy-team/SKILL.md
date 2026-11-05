@@ -36,8 +36,9 @@ Decide from the user's message:
 1. Find `.claude/team.md` in the workspace root (walk up from the current directory). If there is
    none, tell the user this project is not set up yet and offer to run setup (`SETUP.md`) now.
    Continue with the feature only after setup has saved a team.md.
-2. Read team.md fully, then read every conventions file it lists. team.md and those conventions
-   override anything generic in this skill.
+2. Read team.md fully, then the conventions it lists for **all agents** and for the **lead**.
+   Read the role-specific and "on demand" files only when planning or reviewing that part.
+   team.md and those conventions override anything generic in this skill.
 3. Detect the shell (`echo $SHELL` / `$PSVersionTable`) so commands use the right form
    (e.g. `./mvnw` in bash, `.\mvnw.cmd` in PowerShell).
 4. For each repo in team.md, run `git status` and `git branch --show-current`. If a repo has
@@ -84,6 +85,8 @@ Update it at the end of every phase and whenever an agent finishes or a fix roun
    `<feature folder>/requirements.md` so subagents can read it.
 3. Trace the current code that the feature touches: pages, API wrappers, controllers, services,
    models, policies. Follow any planning checklist the project's conventions provide.
+   Read code cheaply: search first, then read only the needed parts of large files
+   (see team.md's large-file limit).
 4. Write `<feature folder>/plan.md` from `templates/plan.template.md`. It must contain:
    - the goal in 2-3 lines and what is out of scope
    - the system design: data model / schema changes, API contract (every endpoint with method,
@@ -104,7 +107,9 @@ Update it at the end of every phase and whenever an agent finishes or a fix roun
 1. In every repo the plan touches, create and check out the feature branch from the base branch
    named in team.md. Do this yourself before any subagent starts, so they never race on git.
 2. Write one brief per agent: `<feature folder>/tasks/<agent>.md`, using
-   `templates/task.template.md`. A brief lists: the files to read first, the exact repos and
+   `templates/task.template.md`. A brief lists: the files to read first (that agent's role
+   conventions from team.md, plus only the "on demand" files this feature needs, plus the exact
+   reference code with line ranges for large files), the exact repos and
    folders the agent owns, the tasks, the checks to run, and the commit rules from team.md.
 
 ## Phase 3: Run the team

@@ -10,10 +10,19 @@ without guessing. You never edit application code.
 
 ## Start
 1. Read the task brief the lead pointed you to, then everything it lists under "Read first":
-   `.claude/team.md`, the conventions files (especially any UI and wording rules), and `plan.md`.
+   `.claude/team.md`, the conventions team.md lists for the designer (usually the shared
+   rules: wording, UI), and `plan.md`. Do not read backend or frontend coding rules.
 2. Study the existing UI before designing: the pages and shared components the plan names as
    references, the Tailwind/theme config, and the label/wording helpers. New screens must look
    and behave like the screens already in the app.
+
+## Reading (keep it cheap)
+- Read only the conventions team.md lists for **all agents** and for **your role** (designer). Read an
+  "on demand" file only when its condition applies to your task, or when your brief names it.
+- `CLAUDE.md` / `AGENTS.md` files inside a repo may already be loaded for you; do not read the
+  same rules twice.
+- Large files (over ~1,000 lines, or the limit team.md sets): search first (grep for the class,
+  method, or field), then read only the line ranges you need. Never read a large file whole.
 
 ## Write `<feature folder>/design-spec.md`
 Cover, per screen:

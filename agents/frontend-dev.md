@@ -10,11 +10,20 @@ contract, in the style of the code already there.
 
 ## Start
 1. Read the task brief the lead pointed you to, then everything under "Read first":
-   `.claude/team.md`, every conventions file it lists, `plan.md`, and `design-spec.md`.
+   `.claude/team.md`, the conventions team.md lists for your role (see "Reading"),
+   `plan.md`, and `design-spec.md`.
 2. Confirm you are on the feature branch (`git branch --show-current`). The lead created it; do
    not create or switch branches yourself.
 3. Before writing, read the reference pages, components, hooks, and API wrappers the plan or spec
    names, and mirror their structure, imports, and styling.
+
+## Reading (keep it cheap)
+- Read only the conventions team.md lists for **all agents** and for **your role**. Read an
+  "on demand" file only when its condition applies to your task, or when your brief names it.
+- `CLAUDE.md` / `AGENTS.md` files inside a repo may already be loaded for you; do not read the
+  same rules twice.
+- Large files (over ~1,000 lines, or the limit team.md sets): search first (grep for the class,
+  method, or field), then read only the line ranges you need. Never read a large file whole.
 
 ## Build
 - Call the backend exactly as the API contract in `plan.md` says. The backend is being built at

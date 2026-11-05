@@ -5,10 +5,12 @@ Branch (already checked out by the lead): `feature/<slug>`
 
 ## Read first, in this order
 1. `.claude/team.md`
-2. <conventions files from team.md>
-3. `<feature folder>/plan.md` - especially "API contract" and your task section
-4. <`<feature folder>/design-spec.md` - frontend only>
-5. <existing reference files in the code, e.g. the page or service to mirror>
+2. Your role's conventions from team.md ("All agents" + yours)
+3. On-demand files this feature needs: <list, or none>
+4. `<feature folder>/plan.md` - especially "API contract" and your task section
+5. <`<feature folder>/design-spec.md` - frontend only>
+6. Reference code to mirror, with line ranges for large files:
+   <e.g. `service/ExampleService.java` lines 120-260 (`save`, `submit`)>
 
 ## You own (write only here)
 - <repo>/<folder>

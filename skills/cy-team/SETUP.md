@@ -35,7 +35,15 @@ For each repo, read only what you need:
 Fill `templates/team.template.md`:
 - Repos table: folder, owner agent (`backend-dev` / `frontend-dev`), stack, base branch.
   Repos that fit neither role: list them as read-only for the team and say so.
-- Conventions: every existing skill or rules file found in step 2.
+- Conventions, split by who needs them (fill the "who reads what" table):
+  - **All agents:** shared rules only (wording, changelog, commit style).
+  - **backend-dev / frontend-dev:** their stack's rules.
+  - **lead:** planning checklists, project maps.
+  - **On demand:** big guides that apply only to some tasks, each with its condition.
+  - **Auto-loaded:** `CLAUDE.md` / `AGENTS.md` inside repos. List them so agents do not read
+    them twice, and do not copy their content into the conventions.
+  If one existing file mixes backend and frontend rules, suggest splitting it (step 5).
+- Reading limits: large-file threshold (default 1,000 lines).
 - Checks: the commands from step 2, split into "agents run these without asking" (fast, local,
   safe) and "needs the user's permission" (slow builds, anything touching a real database).
 - Git: branch pattern `feature/<slug>`, commit style copied from the repo's history, changelog
@@ -58,12 +66,28 @@ Save to `.claude/team.md` only after the user confirms. Create the feature docs 
 
 ## 5. Conventions skill (optional)
 
-If no conventions skill or rules file was found, offer to create one:
-`.claude/skills/<project>-conventions/SKILL.md`. If the user agrees, write it from the code itself:
-package/folder structure, naming, layering, error handling, DTO/component patterns, styling,
-lint rules, test style - each rule backed by what the existing code already does, with file
-examples. Keep it under ~150 lines. Show it and save after the user confirms, then add it to the
-Conventions list in team.md.
+Agents should read only the rules for their role. Use this layout:
+
+```
+.claude/skills/<project>-conventions/
+├── SKILL.md      ~30 lines: shared rules (wording, changelog, commits) + when to read the others
+├── backend.md    backend stack rules
+└── frontend.md   frontend stack rules
+```
+
+`SKILL.md` must say plainly "Backend work: read `backend.md`. Frontend work: read
+`frontend.md`." so the skill still works in normal sessions outside cy-team.
+
+- **None exists:** offer to create it. Write it from the code itself: folder structure, naming,
+  layering, error handling, DTO/component patterns, styling, lint rules, test style - each rule
+  backed by what the code already does, with file examples.
+- **One exists but mixes roles:** offer to split it into the layout above. Lose no rule. Do not
+  duplicate what a repo's `CLAUDE.md` / `AGENTS.md` already says; point to it instead. Never edit
+  those repo files during setup.
+- Before changing existing files, copy them to `.claude/backup-<YYYY-MM-DD>/`.
+- Show the new files (or a diff) and save only after the user confirms. Then fill the
+  "who reads what" table in team.md and report a rough token estimate per agent
+  (about 4 characters per token).
 
 ## 6. Finish
 

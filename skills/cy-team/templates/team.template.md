@@ -13,8 +13,25 @@ instructions. Keep it short; put detailed coding rules in the conventions files.
 | `api-service` | backend-dev | <e.g. Spring Boot 3, Java 21, Maven, PostgreSQL> | `main` |
 | `web-app` | frontend-dev | <e.g. React 18, Vite, Tailwind> | `main` |
 
-## Conventions (read before planning or coding)
-- `.claude/skills/<project>-conventions/SKILL.md`
+## Conventions: who reads what
+Each agent reads only "All agents" plus its own list. "On demand" files are read only when the
+condition applies or a task brief names them.
+
+| Who | Files |
+| --- | --- |
+| All agents | `.claude/skills/<project>-conventions/SKILL.md` (shared rules: wording, changelog, commits) |
+| lead | <planning checklist, project map> |
+| designer | <UI/wording guide, if separate> |
+| backend-dev | `.claude/skills/<project>-conventions/backend.md` |
+| frontend-dev | `.claude/skills/<project>-conventions/frontend.md` |
+
+On demand:
+- `<file>` - when <condition, e.g. "a new form or a change to form logic">
+
+Auto-loaded, do not re-read: <e.g. `api-service/CLAUDE.md` (Claude Code), `AGENTS.md` (Codex)>
+
+## Reading limits
+- Large file: over 1,000 lines. Search first, then read only the needed methods or line ranges.
 
 ## Checks (agents run these without asking)
 - backend-dev: `<command>` in each changed backend repo

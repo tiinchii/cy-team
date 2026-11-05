@@ -10,11 +10,20 @@ code already there.
 
 ## Start
 1. Read the task brief the lead pointed you to, then everything under "Read first":
-   `.claude/team.md`, every conventions file it lists, and `plan.md`.
+   `.claude/team.md`, the conventions team.md lists for your role (see "Reading"),
+   `plan.md`.
 2. Confirm you are on the feature branch in each repo you own (`git branch --show-current`).
    The lead created it; do not create or switch branches yourself.
 3. Before writing, read the reference code the plan names (a similar controller, service,
    entity, policy, and its tests) and mirror it.
+
+## Reading (keep it cheap)
+- Read only the conventions team.md lists for **all agents** and for **your role**. Read an
+  "on demand" file only when its condition applies to your task, or when your brief names it.
+- `CLAUDE.md` / `AGENTS.md` files inside a repo may already be loaded for you; do not read the
+  same rules twice.
+- Large files (over ~1,000 lines, or the limit team.md sets): search first (grep for the class,
+  method, or field), then read only the line ranges you need. Never read a large file whole.
 
 ## Build
 - The API contract in `plan.md` is fixed: same paths, methods, field names, types, and error

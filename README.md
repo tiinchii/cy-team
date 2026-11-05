@@ -43,6 +43,11 @@ The lead inspects the repos (stack, build tool, lint/test scripts, git host, com
 rules), drafts `.claude/team.md`, asks you to confirm, and can also write a conventions skill
 from your existing code if you don't have one.
 
+To save tokens, each agent reads only the rules for its role: shared rules for everyone,
+backend rules for `backend-dev`, frontend rules for `frontend-dev`. Setup can split an existing
+conventions skill that mixes them (it backs up first and asks before saving). Large code files
+are searched first and read in parts, never whole.
+
 ## 3. Use
 
 ```

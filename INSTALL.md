@@ -4,9 +4,20 @@ You are Claude Code or Codex. The user pasted a request to install or update cy-
 repository. Follow these steps, explain briefly what you are doing, and ask before anything
 marked **ASK**. This installs cy-team for the user's account only; it does not touch any project.
 
+**Two places, both required:**
+- `~/.cy-team` is only the **source copy** of this repo, used for updates. Tools do not read it.
+- The install is **not done** until the files are copied into the tool's own folders
+  (step 3A for Claude Code, step 3B for Codex). Never stop after the clone.
+
 ## 1. Get or update the kit
 
-- Kit folder: `~/.cy-team` (Windows: `%USERPROFILE%\.cy-team`).
+- Kit folder: a folder named `.cy-team` **inside** the home folder.
+  - Windows: `C:\Users\<name>\.cy-team`. In PowerShell write it as `Join-Path $HOME '.cy-team'`
+    or `"$HOME\.cy-team"`, never `"$HOME.cy-team"` (that drops the backslash and creates
+    `C:\Users\<name>.cy-team`).
+  - macOS/Linux: `$HOME/.cy-team`.
+- If a wrongly named `<home>.cy-team` folder exists next to the home folder from an earlier
+  install, tell the user and **ASK** before deleting it.
 - Not there yet: `git clone <this repo's URL> ~/.cy-team`.
 - Already there: `git -C ~/.cy-team pull`.
 - If cloning fails because of access, tell the user to log in to GitHub on this computer
@@ -14,11 +25,15 @@ marked **ASK**. This installs cy-team for the user's account only; it does not t
 
 Paths below are relative to the kit folder unless they start with `~`.
 
-## 2. Which tool are you?
+## 2. Which tool(s) to install for
 
-- **Claude Code** -> step 3A.
-- **Codex** -> step 3B.
-If the user asked for both, do both.
+1. **Yourself first, without asking.** You know whether you are Claude Code (-> step 3A) or
+   Codex (-> step 3B). Only if you truly cannot tell, ask the user.
+2. **The other tool: ASK.** Check whether the other tool is on this computer (`~/.codex/` exists
+   or `codex` is on the PATH; `~/.claude/` exists or `claude` is on the PATH). If it is, ask once:
+   "I found <other tool> here too. Install cy-team for it as well?" Do its step too if they say
+   yes. If the user already said "both" in their message, do both without asking.
+3. Say at the start which tool(s) you are installing for.
 
 ## 3A. Claude Code
 
@@ -37,10 +52,14 @@ For model names, use `~/.cy-team-local/models.toml` if it exists (the user's own
 survives updates); otherwise `codex/models.toml`. When the user gives model names for the first
 time, save them to `~/.cy-team-local/models.toml`.
 
-## 4. Check
+## 4. Check (required)
 
-- Claude Code: confirm the files exist in `~/.claude/skills/cy-team/` and `~/.claude/agents/`.
-- Codex: list the agent files written and each agent's model.
+Verify by listing the real folders, not from memory. Show the user the full paths:
+- Claude Code: `~/.claude/skills/cy-team/SKILL.md`, `SETUP.md`, `templates/`, and
+  `~/.claude/agents/designer.md`, `backend-dev.md`, `frontend-dev.md`.
+- Codex: the `cy-team` skill in Codex's user skills folder, and the four agent files in
+  `~/.codex/agents/` with each agent's model.
+If anything is missing, go back and finish that step before reporting.
 - Report whether `git` is available, and whether `gh` and/or `glab` are installed and logged in
   (`gh auth status`, `glab auth status`). They are only needed for opening pull/merge requests.
 
