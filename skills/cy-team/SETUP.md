@@ -40,8 +40,11 @@ Fill `templates/team.template.md`:
   - **backend-dev / frontend-dev:** their stack's rules.
   - **lead:** planning checklists, project maps.
   - **On demand:** big guides that apply only to some tasks, each with its condition.
-  - **Auto-loaded:** `CLAUDE.md` / `AGENTS.md` inside repos. List them so agents do not read
-    them twice, and do not copy their content into the conventions.
+  - **Repo instruction files:** `CLAUDE.md` (auto-loaded by Claude Code only) and `AGENTS.md`
+    (auto-loaded by Codex only). Fill the table in the template so each tool knows which file it
+    must read itself. Do not copy their content into the conventions. If a repo has only one of
+    the two and the user uses both tools, mention it; the user may want a one-line `AGENTS.md`
+    that points to `CLAUDE.md` (do not create it without asking).
   If one existing file mixes backend and frontend rules, suggest splitting it (step 5).
 - Reading limits: large-file threshold (default 1,000 lines).
 - Checks: the commands from step 2, split into "agents run these without asking" (fast, local,

@@ -28,7 +28,11 @@ condition applies or a task brief names them.
 On demand:
 - `<file>` - when <condition, e.g. "a new form or a change to form logic">
 
-Auto-loaded, do not re-read: <e.g. `api-service/CLAUDE.md` (Claude Code), `AGENTS.md` (Codex)>
+Repo instruction files (each tool loads only its own; the other tool must read it):
+| File | Claude Code | Codex |
+| --- | --- | --- |
+| <e.g. `api-service/CLAUDE.md`> | auto-loaded | read it |
+| <e.g. `api-service/AGENTS.md`> | read it | auto-loaded |
 
 ## Reading limits
 - Large file: over 1,000 lines. Search first, then read only the needed methods or line ranges.

@@ -20,8 +20,10 @@ contract, in the style of the code already there.
 ## Reading (keep it cheap)
 - Read only the conventions team.md lists for **all agents** and for **your role**. Read an
   "on demand" file only when its condition applies to your task, or when your brief names it.
-- `CLAUDE.md` / `AGENTS.md` files inside a repo may already be loaded for you; do not read the
-  same rules twice.
+- Repo instruction files: your tool loads its own one automatically - Claude Code loads
+  `CLAUDE.md`, Codex loads `AGENTS.md`. Do not re-read the one your tool already loaded. If a
+  repo has only the other tool's file (e.g. only `CLAUDE.md` and you are Codex), read it: its
+  rules still apply to you.
 - Large files (over ~1,000 lines, or the limit team.md sets): search first (grep for the class,
   method, or field), then read only the line ranges you need. Never read a large file whole.
 
