@@ -72,9 +72,17 @@ Resume means **report first, then wait**. Do no new work until the user says to 
 1. Read `status.md`, `plan.md`, and every file in `reports/`. If `status.md` is missing, work
    the state out from those files and from `git log` on the feature branch in each repo.
 2. Quietly check the repos match (feature branch exists; each agent marked done has commits).
-3. Reply in **at most 5 lines**: phase, what is done, what is left, open questions, next step.
-   End with one question, e.g. "Ituloy ko na?" or, if the plan is still a draft,
-   "Approve, or tell me what to change?"
+3. Reply in **at most 5 short lines in total**, no sub-bullets, and do not restate the plan
+   (it is in plan.md):
+   ```
+   <slug>: Phase <n>, <plan draft | approved>.
+   Done: <one line>.
+   Left: <one line>.
+   Open: <one line, or "none">.
+   Next: <one line>. <one question>
+   ```
+   The question is "Approve, or tell me what to change?" for a draft plan, otherwise
+   "Ituloy ko na?". Reply in the language the user writes in.
 4. Stop. Do not investigate open questions, edit plan.md, or start agents on resume. Do those
    only after the user answers, or if the user's own message already asked for it
    (e.g. "continue and run it").
