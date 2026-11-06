@@ -27,6 +27,14 @@ contract, in the style of the code already there.
 - Large files (over ~1,000 lines, or the limit team.md sets): search first (grep for the class,
   method, or field), then read only the line ranges you need. Never read a large file whole.
 
+## Editing files
+- Use your editor tool (Edit/Write) for changes. Avoid rewriting files with scripts; if you must,
+  keep the file's existing line endings (CRLF or LF) and encoding exactly. In Python open files
+  with `newline=''` for both reading and writing.
+- Do not print large outputs: no whole changelogs, no whole big files, no full build logs. To
+  match the changelog format, look at its first few lines only (`head -c 600`). Filter build
+  output to errors and the summary line.
+
 ## Build
 - Call the backend exactly as the API contract in `plan.md` says. The backend is being built at
   the same time, so do not wait for it and do not guess different field names. If the contract
@@ -40,17 +48,31 @@ contract, in the style of the code already there.
 - Write only in the repos the brief says you own.
 
 ## Check
-Run the frontend checks listed in team.md (e.g. ESLint on the files you changed with
-`--max-warnings 0`). Fix problems you caused; report pre-existing ones separately. Do not install
-or add dependencies unless the plan says so. Never claim a check passed without running it.
+Run the frontend checks listed in team.md (e.g. ESLint with `--max-warnings 0`).
+- Lint only the files you changed: take the list from `git diff --name-only <base>` (plus new
+  files), never a whole folder.
+- A problem that already exists on the base branch is not yours: leave it, list it under
+  "Pre-existing failures", and do not count it as a failure of your change. Check this by
+  comparing with the base version of the file when unsure.
+- Fix failures you caused. If your own new test fails, say in the report whether the code or
+  the test's expectation was wrong, and why.
+- Do not install or add dependencies unless the plan says so.
+- Never claim a check passed without running it.
 
 ## Commit
-- Update the changelog the conventions require.
-- Commit on the feature branch, following team.md exactly for message format and attribution.
-  Do not push; the lead handles pushing and merge requests.
+1. Update the changelog the conventions require.
+2. Stage **only the files you changed, by name**: `git add <file> <file> ...`. Never use
+   `git add -A`, `git add .` or `git commit -a`. Files that were already modified before you
+   started (listed in your brief) must stay unstaged.
+3. Before committing, run `git diff --cached --stat`. The line counts must match what you
+   actually changed. A file showing hundreds of changed lines for a small edit means its line
+   endings or encoding changed: fix that before committing.
+4. Commit on the feature branch, following team.md exactly for message format and attribution.
+   Do not push; the lead handles pushing and merge requests.
 
 ## Report
-Write `<feature folder>/reports/frontend-dev.md`:
+Your **final reply is the report**, in this format (the lead saves it to
+`<feature folder>/reports/frontend-dev.md`; you do not need to write that file):
 ```
 ## Result: done | blocked | partial
 ## Repos and commits: <repo: short hash - message>
@@ -61,4 +83,4 @@ Write `<feature folder>/reports/frontend-dev.md`:
 ## Contract problems: <list or none>
 ## Not verified: <e.g. "not run in a browser against the real backend">
 ```
-Reply with the report path and a 3-line summary.
+Keep it short: no code, no command output.

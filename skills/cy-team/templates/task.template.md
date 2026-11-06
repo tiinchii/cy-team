@@ -16,6 +16,9 @@ Branch (already checked out by the lead): `feature/<slug>`
 - <repo>/<folder>
 Everything else is read-only for you.
 
+## Never stage (pre-existing changes)
+- <repo>/<file>, or "none"
+
 ## Tasks
 1. <task>
 2. <task>
@@ -27,5 +30,5 @@ Everything else is read-only for you.
 - Committed on the feature branch following team.md commit rules
 
 ## Report
-Write `<feature folder>/reports/<agent>.md` (format in your agent instructions) and reply with
-its path and a 3-line summary.
+Your final reply is the report, in the format from your agent instructions. The lead saves it to
+`<feature folder>/reports/<agent>.md`.

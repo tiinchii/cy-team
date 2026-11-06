@@ -27,6 +27,14 @@ code already there.
 - Large files (over ~1,000 lines, or the limit team.md sets): search first (grep for the class,
   method, or field), then read only the line ranges you need. Never read a large file whole.
 
+## Editing files
+- Use your editor tool (Edit/Write) for changes. Avoid rewriting files with scripts; if you must,
+  keep the file's existing line endings (CRLF or LF) and encoding exactly. In Python open files
+  with `newline=''` for both reading and writing.
+- Do not print large outputs: no whole changelogs, no whole big files, no full build logs. To
+  match the changelog format, look at its first few lines only (`head -c 600`). Filter build
+  output to errors and the summary line.
+
 ## Build
 - The API contract in `plan.md` is fixed: same paths, methods, field names, types, and error
   codes. If it cannot work as written, stop and report back under "Contract problems" - do not
@@ -40,17 +48,29 @@ code already there.
 - Write only in the repos the brief says you own.
 
 ## Check
-Run the backend checks listed in team.md for every repo you changed (e.g. `./mvnw verify`; on
-PowerShell `.\mvnw.cmd verify`). Fix failures you caused. If a failure existed before your change,
-leave it and report it separately. Never claim a check passed without running it.
+Run the backend checks listed in team.md (e.g. `./mvnw verify`; on PowerShell
+`.\mvnw.cmd verify`) in every repo you changed.
+- A problem that already exists on the base branch is not yours: leave it, list it under
+  "Pre-existing failures", and do not count it as a failure of your change. Check this by
+  comparing with the base version of the file when unsure.
+- Fix failures you caused. If your own new test fails, say in the report whether the code or
+  the test's expectation was wrong, and why.
+- Never claim a check passed without running it.
 
 ## Commit
-- Update the changelog the conventions require.
-- Commit on the feature branch, following team.md exactly for message format and attribution.
-  Small logical commits are fine. Do not push; the lead handles pushing and merge requests.
+1. Update the changelog the conventions require.
+2. Stage **only the files you changed, by name**: `git add <file> <file> ...`. Never use
+   `git add -A`, `git add .` or `git commit -a`. Files that were already modified before you
+   started (listed in your brief) must stay unstaged.
+3. Before committing, run `git diff --cached --stat`. The line counts must match what you
+   actually changed. A file showing hundreds of changed lines for a small edit means its line
+   endings or encoding changed: fix that before committing.
+4. Commit on the feature branch, following team.md exactly for message format and attribution.
+   Do not push; the lead handles pushing and merge requests.
 
 ## Report
-Write `<feature folder>/reports/backend-dev.md`:
+Your **final reply is the report**, in this format (the lead saves it to
+`<feature folder>/reports/backend-dev.md`; you do not need to write that file):
 ```
 ## Result: done | blocked | partial
 ## Repos and commits: <repo: short hash - message>
@@ -62,4 +82,4 @@ Write `<feature folder>/reports/backend-dev.md`:
 ## Contract problems: <list or none>
 ## Notes for frontend: <anything they must know>
 ```
-Reply with the report path and a 3-line summary.
+Keep it short: no code, no command output.

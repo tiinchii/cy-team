@@ -49,7 +49,8 @@ End with "Questions for the lead" for anything the plan leaves unclear.
 - Write only inside the feature folder.
 
 ## Report
-Write `<feature folder>/reports/designer.md`:
+Your **final reply is the report**, in this format (the lead saves it to
+`<feature folder>/reports/designer.md`; you do not need to write that file):
 ```
 ## Result: done | blocked
 ## Spec: design-spec.md
@@ -58,4 +59,4 @@ Write `<feature folder>/reports/designer.md`:
 ## New components proposed: <list or none>
 ## Questions for the lead: <list or none>
 ```
-Reply with the report path and a 3-line summary.
+Keep it short.

@@ -41,8 +41,10 @@ Decide from the user's message:
    team.md and those conventions override anything generic in this skill.
 3. Detect the shell (`echo $SHELL` / `$PSVersionTable`) so commands use the right form
    (e.g. `./mvnw` in bash, `.\mvnw.cmd` in PowerShell).
-4. For each repo in team.md, run `git status` and `git branch --show-current`. If a repo has
-   uncommitted changes that are not yours, stop and ask the user before touching it.
+4. For each repo in team.md, run `git status --short` and `git branch --show-current`. Files
+   already modified that are not part of this work (e.g. a local config) are **pre-existing
+   changes**: record them in `status.md`, name them in every brief as "never stage", and never
+   commit them. If such changes touch files the plan needs, ask the user before going on.
 5. **Resume check.** If the user names a feature that already has a folder (e.g.
    "/cy-team continue user-login"), or the request matches an existing folder, resume it instead
    of starting over - see "Resuming" below.
@@ -57,6 +59,7 @@ Update it at the end of every phase and whenever an agent finishes or a fix roun
 - Phase: 1-plan | 2-prepare | 3-run | 4-review | 5-deliver | done
 - Plan: draft | approved (YYYY-MM-DD)
 - Branches: <repo: feature/<slug>, created yes/no>
+- Pre-existing changes (never stage): <repo: files, or none>
 - designer: not needed | pending | running | done | blocked
 - backend-dev: pending | running | done | blocked (tier: standard/strong)
 - frontend-dev: pending | running | done | blocked
@@ -106,8 +109,11 @@ Keep messages short; the details live in the feature files.
    `<feature folder>/requirements.md` so subagents can read it.
 3. Trace the current code that the feature touches: pages, API wrappers, controllers, services,
    models, policies. Follow any planning checklist the project's conventions provide.
-   Read code cheaply: search first, then read only the needed parts of large files
-   (see team.md's large-file limit).
+   **Keep your own context small.** Hand the search to a read-only search subagent on the
+   `fast` tier (Claude Code: the built-in `Explore` agent) and ask it for file paths, method
+   names and line ranges, not file contents. Read code yourself only for the few spots the plan
+   depends on, in line ranges. If your context is already large when a run starts (e.g. other
+   work earlier in the session), suggest `/clear` or `/compact` before planning.
 4. Write `<feature folder>/plan.md` from `templates/plan.template.md`. It must contain:
    - the goal in 2-3 lines and what is out of scope
    - the system design: data model / schema changes, API contract (every endpoint with method,
@@ -187,6 +193,9 @@ or a bug fix with a known cause.
 The lead's own model is whatever the user selected for the session; recommend a `strong` model
 for the lead in the plan summary if the session is on a smaller one and the plan is heavy.
 
+When an agent replies, save its reply as `<feature folder>/reports/<agent>.md` yourself (agents
+may not write report files) and update `status.md`.
+
 Rules while they run:
 - An agent that finds the contract wrong or incomplete must stop and report back, not invent a
   different contract. You decide; if the change is material, ask the user, update plan.md, and
@@ -197,9 +206,16 @@ Rules while they run:
 
 When the agents report back:
 
-1. Read each agent's report (`<feature folder>/reports/<agent>.md`) and the diffs
-   (`git diff <base>...HEAD` per repo).
+1. Read each agent's report (`<feature folder>/reports/<agent>.md`). For the diffs, start with
+   `git diff --stat <base>...HEAD` per repo and open only the parts you need to check; do not
+   read whole diffs of large files.
 2. Check:
+   - the line counts in `--stat` fit the change: a file with hundreds of changed lines for a
+     small edit means line endings or encoding changed; send it back
+   - only the intended files were committed, and no pre-existing change (from `status.md`) is
+     in any commit
+   - commit messages follow team.md: run `git log --format=%B <base>..HEAD` and check the
+     format and that no forbidden attribution (e.g. `Co-Authored-By`) is present
    - every endpoint in the contract exists in the backend with the same path, method, field
      names and types, and the frontend calls it exactly that way
    - authorization lives where the conventions require (server side), not only in the UI
@@ -217,14 +233,20 @@ When the agents report back:
 2. If team.md enables merge/pull requests, push each feature branch and open one request per
    repo with the command team.md gives. Link the requests to each other in their descriptions
    when the feature spans repos.
-3. Write `<feature folder>/summary.md` and reply to the user with:
+   If no MR/PR tool is available, push nothing; write `<feature folder>/mr-description.md` per
+   repo instead (title, summary, how to test, links to sibling branches) so the user can paste it.
+3. Write `<feature folder>/summary.md` with:
    - what was built, per repo, with branch and MR/PR links
    - the checks that actually ran and their results, and any checks that did not run and why
+   - **How to test by hand**: short steps the user can follow in the running app (which page,
+     what to enter, what should appear), since agents usually cannot start the services
    - open issues, follow-ups, and anything the user must do (e.g. run an SQL script)
+   Reply to the user with the short version (see "Talking to the user").
 
 ## Never
 
 - Start coding or create branches before the plan is approved.
 - Claim a check passed without running it.
+- Let anyone stage files with `git add -A`, `git add .` or `git commit -a`.
 - Run against production data, seed databases, or print secrets.
 - Merge requests yourself; the user approves and merges.
