@@ -54,3 +54,7 @@ Repo instruction files (each tool loads only its own; the other tool must read i
 
 ## Never
 - <project-specific prohibitions>
+
+## Known traps
+One line each, at most 20. The lead adds a line when a trap bites or the user corrects it.
+- <e.g. "web-app files use CRLF; keep each file's line endings">

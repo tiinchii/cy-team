@@ -54,8 +54,8 @@ The agent files carry the same rules; in solo and quick you follow them yourself
 1. Find `.claude/team.md` in the workspace root (walk up from the current directory). If there is
    none, tell the user this project is not set up yet and offer to run setup (`SETUP.md`) now.
    Continue with the feature only after setup has saved a team.md.
-2. Read team.md fully, then the conventions it lists for **all agents** and for the **lead**, and
-   `.claude/cy-team-lessons.md` if it exists (short list of traps that already happened here).
+2. Read team.md fully (including its "Known traps" section), then the conventions it lists for
+   **all agents** and for the **lead**.
    Read the role-specific and "on demand" files only when planning or reviewing that part.
    team.md and those conventions override anything generic in this skill.
 3. Detect the shell (`echo $SHELL` / `$PSVersionTable`) so commands use the right form
@@ -282,9 +282,10 @@ the same way:
      what to enter, what should appear), since agents usually cannot start the services
    - open issues, follow-ups, and anything the user must do (e.g. run an SQL script)
    Reply to the user with the short version (see "Talking to the user").
-4. Lessons: if a trap bit during this run (e.g. line endings, a wrong path, a check that needs a
-   flag) or the user corrected you, add one line to `.claude/cy-team-lessons.md` (create it if
-   missing). Keep it at most 20 lines; merge or drop old lines rather than growing it.
+4. Known traps: if a trap bit during this run (e.g. line endings, a wrong path, a check that needs
+   a flag) or the user corrected you, add one line to the "Known traps" section at the end of
+   team.md (create the section if missing). Keep it at most 20 lines; merge or drop old lines
+   rather than growing it.
 
 ## Never
 

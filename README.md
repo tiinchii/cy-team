@@ -73,7 +73,7 @@ Each feature keeps its files in `docs/features/<slug>/`:
 Each agent is a full cold start (rules and code read again), so team mode uses several times
 more of your usage than solo. Every mode keeps the plan and approval, safe commits, checks,
 `status.md`/resume, and the summary with manual test steps. Traps that already happened in a
-project are kept in `.claude/cy-team-lessons.md` (short) and read at the start of every run.
+project are kept in a short "Known traps" section at the end of `.claude/team.md`, read at the start of every run.
 
 ### Saving tokens: compact, clear, resume
 
