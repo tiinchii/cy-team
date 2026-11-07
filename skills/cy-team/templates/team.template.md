@@ -37,9 +37,10 @@ Repo instruction files (each tool loads only its own; the other tool must read i
 ## Reading limits
 - Large file: over 1,000 lines. Search first, then read only the needed methods or line ranges.
 
-## Checks (agents run these without asking)
-- backend-dev: `<command>` in each changed backend repo
-- frontend-dev: `<command>` on changed files
+## Checks (run without asking)
+- Fast check while working: backend `<e.g. ./mvnw test -Dtest=<TestClass>>`; frontend `<e.g. eslint on one file>`
+- Full check when done (at most twice): backend `<command>` in each changed backend repo;
+  frontend `<command>` on changed files
 
 ## Checks that need the user's permission
 - <e.g. full production build, anything that touches a shared database>

@@ -36,6 +36,10 @@ contract, in the style of the code already there.
   output to errors and the summary line.
 
 ## Build
+- Your brief is a packet: it names the files, line ranges and signatures to work with. Start
+  there; search further only when it is not enough.
+- Do not edit shared files outside your ownership (helpers other pages or services use, shared
+  config). Ask for the change in your report instead.
 - Call the backend exactly as the API contract in `plan.md` says. The backend is being built at
   the same time, so do not wait for it and do not guess different field names. If the contract
   or the spec is missing something you need, stop and report it under "Contract problems".
@@ -54,6 +58,9 @@ Run the frontend checks listed in team.md (e.g. ESLint with `--max-warnings 0`).
 - A problem that already exists on the base branch is not yours: leave it, list it under
   "Pre-existing failures", and do not count it as a failure of your change. Check this by
   comparing with the base version of the file when unsure.
+- While working, use the fast check from your brief (e.g. one test class). Run the full check at
+  most **twice** (when done, and after fixes). Still failing after the second full run: stop and
+  report what fails instead of looping.
 - Fix failures you caused. If your own new test fails, say in the report whether the code or
   the test's expectation was wrong, and why.
 - Do not install or add dependencies unless the plan says so.

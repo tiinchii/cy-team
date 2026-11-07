@@ -1,8 +1,9 @@
 # cy-team
 
-A small dev team for Claude Code and Codex: one **lead** (the main agent) plus three subagents.
-The lead plans, waits for your approval, assigns the work, runs the agents in parallel, reviews
-their output, and opens the merge/pull requests. You approve and merge.
+A planned, approved, checked way to build features with Claude Code and Codex. The **lead** (the
+main agent) plans, waits for your approval, builds it itself by default, or hands parts to
+subagents when you ask (hybrid or team), reviews, commits safely, and prepares the merge/pull
+requests. You approve and merge.
 
 ```
 /cy-team "<feature>"
@@ -59,6 +60,20 @@ Nothing touches the code before you approve.
 
 Each feature keeps its files in `docs/features/<slug>/`:
 `status.md`, `requirements.md`, `plan.md`, `design-spec.md`, `tasks/`, `reports/`, `summary.md`.
+
+### Modes
+
+| Command | Who builds | When |
+| --- | --- | --- |
+| `/cy-team quick <fix>` | the lead, short plan | labels, fields, small bug fixes |
+| `/cy-team <feature>` | the lead (solo, default) | most work; cheapest |
+| `/cy-team hybrid <feature>` | one agent for the heavy side, the lead does the rest meanwhile | big backend plus a small UI |
+| `/cy-team team <feature>` | designer, backend and frontend agents in parallel | large, truly separate work, when speed matters more than usage |
+
+Each agent is a full cold start (rules and code read again), so team mode uses several times
+more of your usage than solo. Every mode keeps the plan and approval, safe commits, checks,
+`status.md`/resume, and the summary with manual test steps. Traps that already happened in a
+project are kept in `.claude/cy-team-lessons.md` (short) and read at the start of every run.
 
 ### Saving tokens: compact, clear, resume
 

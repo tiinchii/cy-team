@@ -36,6 +36,10 @@ code already there.
   output to errors and the summary line.
 
 ## Build
+- Your brief is a packet: it names the files, line ranges and signatures to work with. Start
+  there; search further only when it is not enough.
+- Do not edit shared files outside your ownership (helpers other pages or services use, shared
+  config). Ask for the change in your report instead.
 - The API contract in `plan.md` is fixed: same paths, methods, field names, types, and error
   codes. If it cannot work as written, stop and report back under "Contract problems" - do not
   change it on your own. The frontend is being built against it at the same time.
@@ -53,6 +57,9 @@ Run the backend checks listed in team.md (e.g. `./mvnw verify`; on PowerShell
 - A problem that already exists on the base branch is not yours: leave it, list it under
   "Pre-existing failures", and do not count it as a failure of your change. Check this by
   comparing with the base version of the file when unsure.
+- While working, use the fast check from your brief (e.g. one test class). Run the full check at
+  most **twice** (when done, and after fixes). Still failing after the second full run: stop and
+  report what fails instead of looping.
 - Fix failures you caused. If your own new test fails, say in the report whether the code or
   the test's expectation was wrong, and why.
 - Never claim a check passed without running it.

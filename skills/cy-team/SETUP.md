@@ -47,6 +47,7 @@ Fill `templates/team.template.md`:
     that points to `CLAUDE.md` (do not create it without asking).
   If one existing file mixes backend and frontend rules, suggest splitting it (step 5).
 - Reading limits: large-file threshold (default 1,000 lines).
+- Fast check: the narrowest check to run while working (one test class, one file's lint).
 - Checks: the commands from step 2, split into "agents run these without asking" (fast, local,
   safe) and "needs the user's permission" (slow builds, anything touching a real database).
 - Git: branch pattern `feature/<slug>`, commit style copied from the repo's history, changelog

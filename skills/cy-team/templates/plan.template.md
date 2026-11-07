@@ -40,7 +40,11 @@ Manual SQL needed (things the ORM cannot do): <none / file name under scripts/>
 
 ## Tasks
 
-### Models
+### Mode and models
+- Mode: quick / solo / hybrid / team - <one-line reason>
+
+Hybrid and team only:
+
 | Agent | Tier | Reason |
 | --- | --- | --- |
 | designer | fast / skip | <e.g. "one simple screen"> |

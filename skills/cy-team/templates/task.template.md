@@ -16,6 +16,9 @@ Branch (already checked out by the lead): `feature/<slug>`
 - <repo>/<folder>
 Everything else is read-only for you.
 
+## Do not edit (shared files; ask in your report)
+- <path>, or "none"
+
 ## Never stage (pre-existing changes)
 - <repo>/<file>, or "none"
 

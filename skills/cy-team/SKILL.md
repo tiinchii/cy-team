@@ -1,15 +1,33 @@
 ---
 name: cy-team
-description: Run a small dev team on a feature or fix - the main agent plans and gets the user's approval, then assigns UI/UX design, backend, and frontend work to subagents that run in parallel, reviews their output, and opens merge/pull requests. Use when the user invokes /cy-team, asks to "run the team", "assign this to the agents", build a feature across backend and frontend, set up cy-team for a project ("/cy-team setup"), or continue a cy-team feature. Works on any project; a project without a .claude/team.md profile gets one through setup.
+description: Plan, approve, build, check and deliver a feature or fix. The main agent plans and gets the user's approval, then builds it itself (solo, the default, cheapest) or, when asked, with one helper agent (hybrid) or a team of design, backend and frontend subagents in parallel (team); it reviews, commits safely, and prepares merge/pull requests. Use when the user invokes /cy-team, asks to "run the team", "assign this to the agents", build a feature across backend and frontend, set up cy-team for a project ("/cy-team setup"), or continue a cy-team feature. Works on any project; a project without a .claude/team.md profile gets one through setup.
 ---
 
 # cy-team: plan, approve, assign, review
 
-You are the **lead**. You plan, assign, and review. You do not write application code yourself; the
-subagents do. Everything a subagent needs must be in files, because each subagent starts with no
-memory of this conversation.
+You are the **lead**. You plan, get the user's approval, build or assign the work, review it, and
+deliver it. Subagents cost a full cold start each (system prompt, rules, re-reading code), so the
+default is **solo**: you build it yourself. Use agents only in the modes that ask for them.
 
-The team:
+## Modes
+
+Decide from the user's message:
+
+| Message | Mode | Who builds |
+| --- | --- | --- |
+| `/cy-team setup` | **Setup**: follow `SETUP.md` in this skill's folder, then stop | - |
+| `/cy-team continue <slug>`, "ituloy ang <slug>" | **Resume**: Phase 0, then "Resuming" | as before |
+| `/cy-team quick <small fix>` | **Quick**: a 3-5 line plan, approval, then solo | you |
+| `/cy-team <feature>` | **Solo** (default) | you, backend first, then frontend |
+| `/cy-team hybrid <feature>` | **Hybrid** | one agent for the heavy side; you do the rest meanwhile |
+| `/cy-team team <feature>` | **Team** | designer / backend-dev / frontend-dev in parallel |
+| `/cy-team` alone | Ask what to build, or offer setup if there is no team.md | - |
+
+If a solo or quick request turns out large (several services, more than a day of work), say so in
+the plan and recommend hybrid or team; the user decides when approving. If your runtime cannot
+start subagents, run hybrid and team as solo and say so.
+
+The agents, used only in hybrid and team:
 
 | Agent | Role | Writes to |
 | --- | --- | --- |
@@ -17,26 +35,27 @@ The team:
 | `backend-dev` | Server code, database, tests | the backend repos listed in team.md |
 | `frontend-dev` | UI code against the API contract and design spec | the frontend repos listed in team.md |
 
-If your runtime cannot start subagents, do each role yourself in the same order, one at a time, and
-say so in the report.
+## Work rules (for whoever writes code: you, or an agent)
 
-## Modes
-
-Decide from the user's message:
-
-| Message | Mode |
-| --- | --- |
-| `/cy-team setup`, "set up cy-team here" | **Setup**: follow `SETUP.md` in this skill's folder, then stop |
-| `/cy-team continue <slug>`, "ituloy ang <slug>", "resume <slug>" | **Resume**: Phase 0, then "Resuming" |
-| `/cy-team <feature request>` | **Feature**: Phase 0 to Phase 5 |
-| `/cy-team` alone | Ask what to build, or offer setup if there is no team.md |
+The agent files carry the same rules; in solo and quick you follow them yourself.
+- **Edit** with the editor tool. If a script must edit, keep line endings and encoding exactly
+  (Python: `newline=''`). Never put patch bodies in a shell heredoc.
+- **Read cheaply:** search first, then read line ranges; no whole large files, no whole
+  changelogs (first ~600 characters for the format), no full build logs (errors and summary only).
+- **Check cheaply:** while working, run the fast check from team.md (e.g. one test class); run the
+  full check (e.g. `./mvnw verify`) at most **twice**: once when done and once after fixes. Still
+  failing after the second full run: stop and report instead of looping. Lint only changed files.
+- **Commit safely:** stage files by name (never `git add -A`, `git add .`, `git commit -a`), keep
+  pre-existing changes unstaged, check `git diff --cached --stat` before committing, follow
+  team.md for the message and attribution.
 
 ## Phase 0: Load the project
 
 1. Find `.claude/team.md` in the workspace root (walk up from the current directory). If there is
    none, tell the user this project is not set up yet and offer to run setup (`SETUP.md`) now.
    Continue with the feature only after setup has saved a team.md.
-2. Read team.md fully, then the conventions it lists for **all agents** and for the **lead**.
+2. Read team.md fully, then the conventions it lists for **all agents** and for the **lead**, and
+   `.claude/cy-team-lessons.md` if it exists (short list of traps that already happened here).
    Read the role-specific and "on demand" files only when planning or reviewing that part.
    team.md and those conventions override anything generic in this skill.
 3. Detect the shell (`echo $SHELL` / `$PSVersionTable`) so commands use the right form
@@ -120,8 +139,8 @@ Keep messages short; the details live in the feature files.
      path, request and response JSON, error codes), authorization rules, workflow/status rules
    - which existing patterns are reused and what differs
    - the task list per agent, with the exact repos and main files each will touch
-   - which agents are needed (skip `designer` for a backend-only or tiny UI change)
-   - the model for each agent, using "Choosing models" below, with a one-line reason
+   - the mode (quick / solo / hybrid / team) and, for hybrid and team, which agents and the model
+     tier of each (see "Choosing models"), with a one-line reason
    - the branch name (`feature/<slug>` unless team.md says otherwise)
    - risks and open questions
 5. **STOP.** Show the user a short summary of plan.md and its path, then ask:
@@ -133,23 +152,41 @@ Keep messages short; the details live in the feature files.
 
 1. In every repo the plan touches, create and check out the feature branch from the base branch
    named in team.md. Do this yourself before any subagent starts, so they never race on git.
-2. Write one brief per agent: `<feature folder>/tasks/<agent>.md`, using
-   `templates/task.template.md`. A brief lists: the files to read first (that agent's role
-   conventions from team.md, plus only the "on demand" files this feature needs, plus the exact
-   reference code with line ranges for large files), the exact repos and
-   folders the agent owns, the tasks, the checks to run, and the commit rules from team.md.
+2. Hybrid and team only: write one brief per agent, `<feature folder>/tasks/<agent>.md`, from
+   `templates/task.template.md`. Make it a **packet**: everything the agent needs so it does not
+   have to explore - its role conventions from team.md, only the "on demand" files this feature
+   needs, and the exact code to touch or mirror as paths with line ranges, method and field names
+   and signatures you already found. Keep it under about 8 KB. Also list the repos and folders it
+   owns, the shared files it must not edit, the never-stage files, the tasks, the fast and full
+   checks, and the commit rules.
 
-## Phase 3: Run the team
+## Phase 3: Build
 
+### Quick and solo
+Build it yourself, following "Work rules": backend first (with its tests), then frontend, then
+the changelogs. Update `status.md` after each part. If your context is getting large between the
+backend and frontend parts, save `status.md` and suggest the user run
+`/compact continue cy-team on <slug>` before you go on.
+
+### Hybrid
+Give the heavier, self-contained side (usually the backend) to one agent with a packet brief, run
+it in the background, and build the other side yourself while it runs. Do not edit files the
+agent owns. Review its result as in Phase 4.
+
+### Team
 Start agents in parallel wherever the dependencies allow, by issuing their launches together:
 
 - **Wave 1 (parallel):** `designer` and `backend-dev`. The backend works from the API contract,
   so it does not need the design.
 - **Wave 2:** `frontend-dev`, as soon as `design-spec.md` exists (the backend may still be
   running). If no designer is needed, start `frontend-dev` in wave 1 too.
+- At most 4 agents at once.
 
+### Launching agents (hybrid and team)
 Each launch prompt is short: "You are on feature `<slug>`. Read `<feature folder>/tasks/<agent>.md`
 and follow it. Workspace root: `<path>`." Do not paste the whole plan into the prompt; point to files.
+Agents never edit shared files outside their ownership (e.g. a helper other pages use); they ask
+for the change in their report and you apply it after they finish.
 
 Launch each agent at the model tier approved in plan.md (see "Choosing models").
 
@@ -163,6 +200,8 @@ Plans name **tiers**, not model names, so the skill keeps working when new model
 | `standard` | `sonnet` | `standard` in `codex/models.toml` |
 | `fast` | `haiku` | `fast` in `codex/models.toml` |
 
+These apply to agents in hybrid and team. In quick and solo everything runs on the session's
+model: suggest `/model sonnet` for light work and a strong model for heavy planning.
 The defaults save tokens; only the backend moves up to `strong`, and only when the work is heavy.
 team.md may change these rules.
 
@@ -204,7 +243,8 @@ Rules while they run:
 
 ## Phase 4: Review
 
-When the agents report back:
+When the work is done (your own in quick/solo, or each agent's report in hybrid/team), check it
+the same way:
 
 1. Read each agent's report (`<feature folder>/reports/<agent>.md`). For the diffs, start with
    `git diff --stat <base>...HEAD` per repo and open only the parts you need to check; do not
@@ -242,6 +282,9 @@ When the agents report back:
      what to enter, what should appear), since agents usually cannot start the services
    - open issues, follow-ups, and anything the user must do (e.g. run an SQL script)
    Reply to the user with the short version (see "Talking to the user").
+4. Lessons: if a trap bit during this run (e.g. line endings, a wrong path, a check that needs a
+   flag) or the user corrected you, add one line to `.claude/cy-team-lessons.md` (create it if
+   missing). Keep it at most 20 lines; merge or drop old lines rather than growing it.
 
 ## Never
 
